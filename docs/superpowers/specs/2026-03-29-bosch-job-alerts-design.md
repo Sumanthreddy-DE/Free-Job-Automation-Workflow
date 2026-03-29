@@ -67,8 +67,39 @@ Automation-test/
 └── README.md
 ```
 
-## Future Extensions (not in scope now)
-- Keyword filtering in job titles
-- Multiple locations
-- Slack/Telegram notification option
-- Job deduplication across runs
+## Implementation Status (Mar 29, 2026)
+
+### Completed
+- [x] Project scaffolded at `C:\Users\suman\Desktop\Docs\Job\Projects\Automation-test`
+- [x] `main.py` — fetch, filter, HTML email, Gmail SMTP send (~100 lines)
+- [x] `requirements.txt` — `requests>=2.31.0`
+- [x] `.github/workflows/notify.yml` — daily cron (5 AM UTC) + manual trigger
+- [x] GitHub repo created: `Sumanthreddy-DE/Free-Job-Automation-Workflow`
+- [x] Code pushed to `main` branch
+- [x] GitHub secrets configured: `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`
+- [x] First manual workflow run — successful, email received
+- [x] Job links verified working (SmartRecruiters URLs resolve correctly)
+
+### Key Decisions Made
+- **No scraping needed** — Bosch uses SmartRecruiters which has a free public API
+- **Job link format:** `https://jobs.smartrecruiters.com/BoschGroup/{posting_id}` (just the ID works, no slug needed)
+- **Experience level field:** `experienceLevel.label` (not `.name`) for display
+- **Department column removed** from email — API list endpoint returns empty department, not worth an extra API call per job
+- **Email columns:** Job Title (clickable link), Level, Posted date
+
+### API Notes
+- SmartRecruiters public API: `https://api.smartrecruiters.com/v1/companies/BoschGroup/postings`
+- No auth, no API key needed
+- Rate limit: 10 req/sec, 8 concurrent (we use 1 request)
+- Single job detail: `https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/{id}`
+- Reutlingen currently has ~57 total jobs, mostly internships
+- Experience level values: `internship` (Praktikum), `entry_level` (PreMaster/Graduate), `associate` (PreMaster), `not_applicable` (Werkstudent/Thesis)
+
+## Future Extensions (not yet implemented)
+- **Keyword filtering** — CONFIG already has `keywords: []` placeholder. Add keywords to match in job titles (case-insensitive, partial). Code already handles this — just populate the list.
+- **Multiple locations** — extend `city` param or make multiple API calls
+- **Multiple companies** — SmartRecruiters hosts many companies, same API pattern works
+- **Slack/Telegram notifications** — add as alternative to email
+- **Job deduplication** — track seen job IDs across runs to avoid repeat notifications
+- **Configurable experience levels** — allow filtering by specific levels
+- **Weekly digest mode** — option for weekly summary instead of daily
